@@ -1,0 +1,13 @@
+D:\Code1\NetworkTest\bin\Debug\NetworkTest.exe
+D:\Code1\NetworkTest\bin\Debug\NetworkTest.pdb
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.Form1.resources
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.Properties.Resources.resources
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.csproj.GenerateResource.cache
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.csproj.CoreCompileInputs.cache
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.exe
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.pdb
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.Report.resources
+D:\Code1\NetworkTest\bin\Debug\appsetting.json
+D:\Code1\NetworkTest\bin\Debug\Newtonsoft.Json.dll
+D:\Code1\NetworkTest\obj\Debug\NetworkTest.csproj.CopyComplete
+D:\code1\NetworkTest\obj\Debug\NetworkTest.csprojAssemblyReference.cache
