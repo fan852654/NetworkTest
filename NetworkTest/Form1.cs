@@ -6,7 +6,10 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -104,7 +107,7 @@ namespace NetworkTest
         public List<string> timeout ;
         private void button3_Click(object sender, EventArgs e)
         {
-            if (!button3.Name.Equals("停止"))
+            if (!button3.Text.Equals("停止"))
             {
                 success = new Dictionary<string, string>();
                 error = new List<string>();
@@ -120,37 +123,95 @@ namespace NetworkTest
                 flag = false;
             }
         }
+        public long IpChange(string ipmsg)
+        {
+            char[] separator = new char[] { '.' };
+            string[] items = ipmsg.Split(separator);
+            long dreamduip = long.Parse(items[0]) << 24
+                    | long.Parse(items[1]) << 16
+                    | long.Parse(items[2]) << 8
+                    | long.Parse(items[3]);
+            long sun = System.Net.IPAddress.HostToNetworkOrder(dreamduip);
+            return sun;
+        }
+        [DllImport("wininet.dll")]
+        private extern static bool InternetGetConnectedState(int Description, int ReservedValue);
+        public static bool IsConnectInternet()
+        {
+            int Description = 0;
+            return InternetGetConnectedState(Description, 0);
+        }
         public void ConnectTestThread()
         {
             while (flag)
             {
-                string host = "61.177.7.1";
-                Ping p1 = new Ping();
-                PingReply reply = p1.Send(host);
-                string time = DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString();
-                if (reply.Status == IPStatus.Success)
+                string host = string.Empty;
+                if (!config.ContainsKey("domain"))
                 {
-                    textBox1.Text += (time + "网络连接成功！" + "\r\n");
-                    success.Add(time,reply.RoundtripTime.ToString());
-                }
-                else if (reply.Status == IPStatus.TimedOut)
-                {
-                    textBox1.Text += (time + "网络连接超时！" + "\r\n");
-                    timeout.Add(time);
+                    host = "61.177.7.1";
                 }
                 else
                 {
-                    textBox1.Text += (time + "网络连接失败！" + "\r\n");
-                    error.Add(time);
+                    host = config["domain"];
                 }
                 try
                 {
                     int timeouttime = int.Parse(textBox2.Text);
                     Thread.Sleep(new TimeSpan(0, 0, 0, timeouttime));
                 }
-                catch 
+                catch
                 {
                     Thread.Sleep(new TimeSpan(0, 0, 0, 30));
+                }
+                string time = DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString();
+                if (config["type"].Equals("1"))
+                {
+                    bool iscon = IsConnectInternet();
+                    if (iscon)
+                    {
+                        textBox1.Text += (time + "网络连接成功！" + "\r\n");
+                        textBox1.Focus();
+                        textBox1.Select(textBox1.TextLength, 0);
+                        textBox1.ScrollToCaret();
+                        success.Add(time, "0");
+                    }
+                    else
+                    {
+                        textBox1.Text += (time + "网络连接失败！" + "\r\n");
+                        textBox1.Focus();
+                        textBox1.Select(textBox1.TextLength, 0);
+                        textBox1.ScrollToCaret();
+                        error.Add(time);
+                    }
+                }
+                else
+                {
+                    Ping p1 = new Ping();
+                    PingReply reply = p1.Send(host);
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        textBox1.Text += (time + "网络连接成功！" + "\r\n");
+                        textBox1.Focus();
+                        textBox1.Select(textBox1.TextLength, 0);
+                        textBox1.ScrollToCaret();
+                        success.Add(time, reply.RoundtripTime.ToString());
+                    }
+                    else if (reply.Status == IPStatus.TimedOut)
+                    {
+                        textBox1.Text += (time + "网络连接超时！" + "\r\n");
+                        textBox1.Focus();
+                        textBox1.Select(textBox1.TextLength, 0);
+                        textBox1.ScrollToCaret();
+                        timeout.Add(time);
+                    }
+                    else
+                    {
+                        textBox1.Text += (time + "网络连接失败！" + "\r\n");
+                        textBox1.Focus();
+                        textBox1.Select(textBox1.TextLength, 0);
+                        textBox1.ScrollToCaret();
+                        error.Add(time);
+                    }
                 }
             }
         }

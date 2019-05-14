@@ -10,4 +10,3 @@ D:\Code1\NetworkTest\obj\Debug\NetworkTest.Report.resources
 D:\Code1\NetworkTest\bin\Debug\appsetting.json
 D:\Code1\NetworkTest\bin\Debug\Newtonsoft.Json.dll
 D:\Code1\NetworkTest\obj\Debug\NetworkTest.csproj.CopyComplete
-D:\code1\NetworkTest\obj\Debug\NetworkTest.csprojAssemblyReference.cache
