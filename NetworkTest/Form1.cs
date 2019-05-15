@@ -1,15 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -131,21 +126,55 @@ namespace NetworkTest
                     | long.Parse(items[1]) << 16
                     | long.Parse(items[2]) << 8
                     | long.Parse(items[3]);
-            long sun = System.Net.IPAddress.HostToNetworkOrder(dreamduip);
+            long sun = IPAddress.HostToNetworkOrder(dreamduip);
             return sun;
         }
-        [DllImport("wininet.dll")]
-        private extern static bool InternetGetConnectedState(int Description, int ReservedValue);
-        public static bool IsConnectInternet()
+        public void CheckMemory()
         {
-            int Description = 0;
-            return InternetGetConnectedState(Description, 0);
+            Dictionary<string, object> dic = new Dictionary<string, object>
+            {
+                { "suc", success },
+                { "err", error },
+                { "timeout", timeout }
+            };
+            if(JsonConvert.SerializeObject(dic).Length >= 6000)
+            {
+                FileStream fs = new FileStream(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString() + "log.log"), FileMode.OpenOrCreate);
+                byte[] msg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(dic));
+                fs.Write(msg, 0, msg.Length);
+                fs.Close();
+                success = new Dictionary<string, string>();
+                error = new List<string>();
+                timeout = new List<string>();
+                textBox1.Clear();
+            }
+        }
+        public bool IsConnectInternet(string host,int port)
+        {
+            try
+            {
+                TcpClient tcpclient = new TcpClient(host, port);
+                if (tcpclient.Connected)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
         public void ConnectTestThread()
         {
+            int a = 1;
             while (flag)
             {
                 string host = string.Empty;
+                int port = 0;
                 if (!config.ContainsKey("domain"))
                 {
                     host = "61.177.7.1";
@@ -153,6 +182,14 @@ namespace NetworkTest
                 else
                 {
                     host = config["domain"];
+                }
+                if (!config.ContainsKey("port"))
+                {
+                    port = 80 ;
+                }
+                else
+                {
+                    port = int.Parse(config["port"]);
                 }
                 try
                 {
@@ -163,10 +200,15 @@ namespace NetworkTest
                 {
                     Thread.Sleep(new TimeSpan(0, 0, 0, 30));
                 }
+                if (a % 100 == 0)
+                {
+                    CheckMemory();
+                    a = 0;
+                }
                 string time = DateTime.Now.ToLongDateString() + " " + DateTime.Now.ToLongTimeString();
                 if (config["type"].Equals("1"))
                 {
-                    bool iscon = IsConnectInternet();
+                    bool iscon = IsConnectInternet(host,port);
                     if (iscon)
                     {
                         textBox1.Text += (time + "网络连接成功！" + "\r\n");
@@ -213,6 +255,7 @@ namespace NetworkTest
                         error.Add(time);
                     }
                 }
+                a++;
             }
         }
 
