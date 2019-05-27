@@ -156,10 +156,12 @@ namespace NetworkTest
                 TcpClient tcpclient = new TcpClient(host, port);
                 if (tcpclient.Connected)
                 {
+                    tcpclient.Close();
                     return true;
                 }
                 else
                 {
+                    tcpclient.Close();
                     return false;
                 }
             }
